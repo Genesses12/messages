@@ -1,18 +1,19 @@
+import dotenv from "dotenv";
+dotenv.config(); // Carregar as variáveis de ambiente
+
 import bodyParser from "body-parser";
 import cors from "cors";
 import express from "express";
 import mysql from "mysql2";
-import dotenv from "dotenv";
-
-dotenv.config();
 
 const app = express();
-const port = process.env.PORT || 3001;
+const port = process.env.PORT || 3001; // Usar a variável de ambiente PORT ou 3001 como padrão
 
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+// Conexão com o banco de dados usando variáveis de ambiente
 const db = mysql.createConnection({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
@@ -22,11 +23,8 @@ const db = mysql.createConnection({
 });
 
 db.connect((err) => {
-  if (err) {
-    console.error("❌ Erro ao conectar no MySQL:", err);
-    return;
-  }
-  console.log("✅ Banco de Dados conectado com sucesso!");
+  if (err) throw err;
+  console.log("MySQL conectado...");
 });
 
 app.post("/submit", (req, res) => {
@@ -34,14 +32,11 @@ app.post("/submit", (req, res) => {
   const sql = "INSERT INTO messages (name, email, message) VALUES (?, ?, ?)";
 
   db.query(sql, [name, email, message], (err) => {
-    if (err) {
-      console.error("❌ Erro ao inserir mensagem:", err);
-      return res.status(500).send("Erro ao salvar mensagem");
-    }
-    res.send("✅ Mensagem salva no Banco de Dados!");
+    if (err) throw err;
+    res.send("Mensagem adicionada ao Banco de dados!");
   });
 });
 
 app.listen(port, () => {
-  console.log(`🚀 Server online na porta ${port}`);
+  console.log(`Server online na porta ${port}`);
 });
